@@ -16,7 +16,6 @@ Grandes lignes du jeu de donnée (avec des informations sur les types)
 
 ```{r}
 summary(salary)
-
 str(salary)
 ```
 
@@ -28,7 +27,51 @@ tail(salary)
 ```
 
 ## Vu complète sur le dataset
-
 ```{r}
 View(salary)
 ```
+
+## Nombre de ligne et de colonne ainsi que quelques données statistiques du dataset
+```{r}
+colonnes <- ncol(salary)
+colnames(salary)
+
+lignes <- nrow(salary)
+
+sprintf("Le dataframe a %d lignes et %d colonnes.", lignes, colonnes)
+```
+
+## Vérification des valeurs NA
+```{r}
+valeurs_manquantes_par_colonne <- colSums(is.na(salary))
+print(valeurs_manquantes_par_colonne)
+```
+## Les différente origine
+```{r}
+nationalite <- unique(salary$native_country)
+print(nationalite)
+
+table_nationalites <- table(salary$native_country)
+
+# Créer un diagramme en camembert avec la fonction pie()
+pie(table_nationalites, labels = names(table_nationalites), main = "Répartition des nationalités")
+barplot(table_nationalites, main = "Répartition des nationalités", xlab = "Nationalité", ylab = "Fréquence", col = rainbow(length(table_nationalites)))
+
+# Afficher le nombre de lignes par nationalité
+print(table_nationalites)
+```
+
+## Répartition par sexe
+```{r}
+table_sexe <- table(salary$sex)
+pourcentages <- round(100 * table_sexe / sum(table_sexe), 1)
+pie(table_sexe, labels = sprintf("%s\n%.1f%%", names(table_sexe), pourcentages), main = "Répartition par sexe")
+```
+
+## Situation marital
+```{r}
+table_marital <- table(salary$marital_status)
+print(table_marital)
+
+```
+
