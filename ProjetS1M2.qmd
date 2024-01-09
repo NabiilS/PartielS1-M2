@@ -1,0 +1,34 @@
+---
+title: "ProjetS1M2"
+format: html
+editor: visual
+---
+
+## Importation du Dataset "Salary"
+
+```{r}
+salary <- read.csv("Salarie.csv")
+```
+
+### Compréhension du Dataset
+
+Grandes lignes du jeu de donnée (avec des informations sur les types)
+
+```{r}
+summary(salary)
+
+str(salary)
+```
+
+### Visualisation du début et la fin de la base de donnée
+
+```{r}
+head(salary)
+tail(salary)
+```
+
+## Vu complète sur le dataset
+
+```{r}
+View(salary)
+```
