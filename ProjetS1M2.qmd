@@ -143,23 +143,29 @@ barplot(contingency_table, beside = FALSE,
 ```
 
 ```{r}
-# Transformer en facteur en excluant les États-Unis
-nationality_factor <- as.factor(salary$native_country)
-nationality_factor <- nationality_factor[nationality_factor != " United-States"]
+# Créer un indice pour les lignes qui ne sont pas les États-Unis
+non_us_indices <- which(salary$native_country != " United-States")
 
-# Créer une nouvelle table de contingence sans les États-Unis
-nationality_table_no_us <- table(nationality_factor, salary$income_40K[nationality_factor != " United-States"])
+# Utiliser cet indice pour créer le facteur de nationalité et la variable de revenu correspondante
+nationality_factor_no_us <- nationality_factor[non_us_indices]
+income_40K_no_us <- salary$income_40K[non_us_indices]
 
-# Générer le graphique en barres empilées sans les données des États-Unis
-barplot(nationality_table_no_us, beside = FALSE, 
-        main = "Revenu par Nationalité (sans les États-Unis)",
-        xlab = "Nationalité", ylab = "Nombre de personnes",
-        col = c("gray", "gold"),
-        legend.text = c("<=50k", ">50k"),
-        las = 2)
+# Créer la table de contingence en utilisant les données filtrées
+nationality_table_no_us <- table(nationality_factor_no_us, income_40K_no_us)
 
+library(ggplot2)
+nationality_income_melted <- melt(nationality_table_no_us)
+# Calculer la proportion de personnes pour chaque pays et catégorie de revenu
+nationality_income_prop <- as.data.frame.matrix(prop.table(nationality_table_no_us, 1))
 
-
+nationality_income_melted <- melt(nationality_income_prop)
+names(nationality_income_melted)
+# Créer une heatmap
+ggplot(nationality_income_melted, aes(x = nationality_factor_no_us, y = income_40K_no_us, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(x = "Nationalité", y = "Revenu", fill = "Proportion") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 ## Histogramme 
 
@@ -174,7 +180,7 @@ boxplot(airquality_net$Ozone, col = my_colors ) ## Voir comment interpréter ce 
 glm_model = glm(income_40K ~ age+sex, data=salary, family = "binomial")
 tbl_regression(glm_model, exponentiate = TRUE)
 ```
-
+## Installer compareGroup, gtsummary, glmnet et car/carData
 ```{r}
 package(carret)
 predict(glm_model,)
