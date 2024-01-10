@@ -130,6 +130,7 @@ plot(as.factor(salary$sex), salary$income_50K, main = "Nuage de points du Sexe v
 ```
 
 # Graphique en barres empilées avec les ajustements
+
 ```{r}
 contingency_table <- table(salary$sex, salary$income_40K)
 
@@ -140,7 +141,6 @@ barplot(contingency_table, beside = FALSE,
         args.legend = list(x = "topright"),
         names.arg = c("<=50k", ">50k")) 
 ```
-
 
 ```{r}
 # Transformer en facteur en excluant les États-Unis
@@ -161,12 +161,14 @@ barplot(nationality_table_no_us, beside = FALSE,
 
 
 ```
+## Histogramme 
 
-
-
-
-
-
+```{r}
+# Créer un histogramme avec une couleur par âge
+my_colors <- rainbow(length(unique(salary$age)))
+hist(salary$age, col = my_colors, main = "Histogramme par âge", xlab = "Âge")
+boxplot(airquality_net$Ozone, col = my_colors ) ## Voir comment interpréter ce graphique
+```
 
 ```{r}
 glm_model = glm(income_40K ~ age+sex, data=salary, family = "binomial")
@@ -177,3 +179,4 @@ tbl_regression(glm_model, exponentiate = TRUE)
 package(carret)
 predict(glm_model,)
 ```
+
