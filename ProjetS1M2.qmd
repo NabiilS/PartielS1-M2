@@ -10,6 +10,23 @@ editor: visual
 salary <- read.csv("Salarie.csv")
 ```
 
+## Compter le nombre de "?"
+```{r}
+# Compter le nombre d'éléments par type dans chaque colonne
+count_by_type <- lapply(salary, table)
+
+# Afficher les résultats
+print(count_by_type)
+```
+
+## Variable non renseigné 
+
+```{r}
+summary(salary$workclass[salary$workclass == " ?"])
+summary(salary$workclass[salary$occupation == " ?"])
+summary(salary$workclass[salary$native_country == " ?"])
+```
+
 ### Compréhension du Dataset
 
 Grandes lignes du jeu de donnée (avec des informations sur les types)
@@ -55,7 +72,6 @@ table_nationalites <- table(salary$native_country)
 
 # Créer un diagramme en camembert avec la fonction pie()
 pie(table_nationalites, labels = names(table_nationalites), main = "Répartition des nationalités")
-barplot(table_nationalites, main = "Répartition des nationalités", xlab = "Nationalité", ylab = "Fréquence", col = rainbow(length(table_nationalites)))
 
 # Afficher le nombre de lignes par nationalité
 print(table_nationalites)
@@ -72,6 +88,15 @@ pie(table_sexe, labels = sprintf("%s\n%.1f%%", names(table_sexe), pourcentages),
 ```{r}
 table_marital <- table(salary$marital_status)
 print(table_marital)
+
+```
+## Graphe et recodage de la variable sex
+```{r}
+boxplot(salary$hours_per_week ~ salary$income_40K, data = salary)
+boxplot(salary$age ~ salary$income_40K, data = salary)
+
+
+salary$sex_binary <- ifelse(salary$sex == " Male", 1, 0)
 
 ```
 
