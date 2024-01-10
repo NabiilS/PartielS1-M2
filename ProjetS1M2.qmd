@@ -11,6 +11,7 @@ salary <- read.csv("Salarie.csv")
 ```
 
 ## Compter le nombre de "?"
+
 ```{r}
 # Compter le nombre d'éléments par type dans chaque colonne
 count_by_type <- lapply(salary, table)
@@ -19,7 +20,7 @@ count_by_type <- lapply(salary, table)
 print(count_by_type)
 ```
 
-## Variable non renseigné 
+## Variable non renseigné
 
 ```{r}
 summary(salary$workclass[salary$workclass == " ?"])
@@ -44,11 +45,13 @@ tail(salary)
 ```
 
 ## Vu complète sur le dataset
+
 ```{r}
 View(salary)
 ```
 
 ## Nombre de ligne et de colonne ainsi que quelques données statistiques du dataset
+
 ```{r}
 colonnes <- ncol(salary)
 colnames(salary)
@@ -59,11 +62,14 @@ sprintf("Le dataframe a %d lignes et %d colonnes.", lignes, colonnes)
 ```
 
 ## Vérification des valeurs NA
+
 ```{r}
 valeurs_manquantes_par_colonne <- colSums(is.na(salary))
 print(valeurs_manquantes_par_colonne)
 ```
+
 ## Les différente origine
+
 ```{r}
 nationalite <- unique(salary$native_country)
 print(nationalite)
@@ -78,6 +84,7 @@ print(table_nationalites)
 ```
 
 ## Répartition par sexe
+
 ```{r}
 table_sexe <- table(salary$sex)
 pourcentages <- round(100 * table_sexe / sum(table_sexe), 1)
@@ -85,12 +92,15 @@ pie(table_sexe, labels = sprintf("%s\n%.1f%%", names(table_sexe), pourcentages),
 ```
 
 ## Situation marital
+
 ```{r}
 table_marital <- table(salary$marital_status)
 print(table_marital)
 
 ```
+
 ## Graphe et recodage de la variable sex
+
 ```{r}
 boxplot(salary$hours_per_week ~ salary$income_40K, data = salary)
 boxplot(salary$age ~ salary$income_40K, data = salary)
@@ -100,11 +110,16 @@ salary$sex_binary <- ifelse(salary$sex == " Male", 1, 0)
 
 
 ```
+
 ## Recodage de la variable income_40K en income_50K en boolean
 
 ```{r}
 
-# Recodage de la variable income_40k en income_50k qui aura 
+# Recodage de la variable income_40k en income_50k qui aura
+class(salary$income_40K)
+class(as.factor(salary$income_40K))
+
+salary$income_40K <- as.factor(salary$income_40K)
 salary$income_50K <- ifelse(salary$income_40K == " >50K", 1, 0)
 sum(is.na(salary$income_50K))
 sum(is.na(salary$sex))
@@ -114,19 +129,51 @@ plot(salary$sex, salary$income_50K, main = "Nuage de points du Sexe vs Salaire",
 plot(as.factor(salary$sex), salary$income_50K, main = "Nuage de points du Sexe vs Salaire", xlab = "Sexe", ylab = "Salaire")
 ```
 
-```{r}
-# Créer un tableau de contingence
-contingency_table <- table(salary$sex_binary, salary$income_50K)
-
-# Afficher le tableau de contingence
-print(contingency_table)
-
 # Graphique en barres empilées avec les ajustements
+```{r}
+contingency_table <- table(salary$sex, salary$income_40K)
+
 barplot(contingency_table, beside = FALSE, 
         main = "Revenu par Sexe",
         xlab = "Sexe", ylab = "Nombre de personnes", col = c("pink", "lightblue"),
-        legend.text = c("Femme", "Homme"), # Définit les textes de la légende
-        args.legend = list(x = "topright"), # Positionne la légende
-        names.arg = c("<=50k", ">50k")) # Définit les étiquettes de l'axe x
+        legend.text = c("Femme", "Homme"), 
+        args.legend = list(x = "topright"),
+        names.arg = c("<=50k", ">50k")) 
+```
 
+
+```{r}
+# Transformer en facteur en excluant les États-Unis
+nationality_factor <- as.factor(salary$native_country)
+nationality_factor <- nationality_factor[nationality_factor != " United-States"]
+
+# Créer une nouvelle table de contingence sans les États-Unis
+nationality_table_no_us <- table(nationality_factor, salary$income_40K[nationality_factor != " United-States"])
+
+# Générer le graphique en barres empilées sans les données des États-Unis
+barplot(nationality_table_no_us, beside = FALSE, 
+        main = "Revenu par Nationalité (sans les États-Unis)",
+        xlab = "Nationalité", ylab = "Nombre de personnes",
+        col = c("gray", "gold"),
+        legend.text = c("<=50k", ">50k"),
+        las = 2)
+
+
+
+```
+
+
+
+
+
+
+
+```{r}
+glm_model = glm(income_40K ~ age+sex, data=salary, family = "binomial")
+tbl_regression(glm_model, exponentiate = TRUE)
+```
+
+```{r}
+package(carret)
+predict(glm_model,)
 ```
