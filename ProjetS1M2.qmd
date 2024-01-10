@@ -111,5 +111,22 @@ sum(is.na(salary$sex))
 # Nuage de points Sexe vs Salaire
 plot(salary$sex, salary$income_50K, main = "Nuage de points du Sexe vs Salaire", xlab = "Sexe", ylab = "Salaire")
 
-View(salary)
+plot(as.factor(salary$sex), salary$income_50K, main = "Nuage de points du Sexe vs Salaire", xlab = "Sexe", ylab = "Salaire")
+```
+
+```{r}
+# Créer un tableau de contingence
+contingency_table <- table(salary$sex_binary, salary$income_50K)
+
+# Afficher le tableau de contingence
+print(contingency_table)
+
+# Graphique en barres empilées avec les ajustements
+barplot(contingency_table, beside = FALSE, 
+        main = "Revenu par Sexe",
+        xlab = "Sexe", ylab = "Nombre de personnes", col = c("pink", "lightblue"),
+        legend.text = c("Femme", "Homme"), # Définit les textes de la légende
+        args.legend = list(x = "topright"), # Positionne la légende
+        names.arg = c("<=50k", ">50k")) # Définit les étiquettes de l'axe x
+
 ```
