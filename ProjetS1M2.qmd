@@ -338,3 +338,17 @@ tbl_regression(glm_model, exponentiate = TRUE)
 package(carret)
 predict(glm_model,)
 ```
+
+## Regression catégoriel
+## Y(salaire)=b0 + b1*sex + b2*race + b3*native_country + b4*age
+```{r}
+salary$sex <- as.factor(salary$sex) 
+salary$race <- as.factor(salary$race)
+salary$native_country <- as.factor(salary$native_country) 
+
+output <- lm(salary$capital_gain~salary$sex+salary$race+salary$native_country+salary$age)
+summary(output)
+
+scatterplot3d(salary$native_country, salary$sex, salary$capital_gain, main = "Régression Linéaire en 3D", xlab = "Variable indépendante 1", ylab = "Variable indépendante 2", zlab = "Variable dépendante")
+
+```
