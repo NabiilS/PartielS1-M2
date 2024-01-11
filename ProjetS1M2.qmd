@@ -6,15 +6,7 @@ editor: visual
 
 ## Importation du Dataset "Salary" et installation des packages
 
-Pour notre mini projet d'analyse des salaires, nous avons besoin des packages ci dessous: 
-- dplyr 
-- ggplot2 
-- compareGroups 
-- car 
-- carData 
-- glmnet 
-- scatterplot3d 
-- gtsummary
+Pour notre mini projet d'analyse des salaires, nous avons besoin des packages ci dessous: - dplyr - ggplot2 - compareGroups - car - carData - glmnet - scatterplot3d - gtsummary
 
 ```{r}
 library(dplyr)
@@ -25,7 +17,9 @@ library(carData)
 library(glmnet)
 library(scatterplot3d)
 library(gtsummary)
-salary <- read.csv("Salarie.csv")
+c <- read.csv("Salarie.csv", na.strings = c(" ?", NA, " ","?"))
+salary <-na.omit(c)
+dim(salary)
 ```
 
 ### Compréhension du Dataset
@@ -76,8 +70,17 @@ summary(salary$workclass[salary$occupation == " ?"])
 summary(salary$workclass[salary$native_country == " ?"])
 ```
 
-## Les différente origine
 
+## recodage
+```{r}
+
+
+salary$sex <- as.factor(salary$sex) 
+salary$race <- as.factor(salary$race)
+salary$native_country <- as.factor(salary$native_country) 
+salary$income_40K <- as.factor(salary$income_40K)
+```
+## Les différente origine
 ```{r}
 nationalite <- unique(salary$native_country)
 print(nationalite)
@@ -140,19 +143,9 @@ ggplot(table_nationalites, aes(x = "", y = Percentage, fill = native_country)) +
   theme(legend.position = "right") +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5))  # Ajuster la position du titre de la légende
 
-# Assurez-vous que table_nationalites utilise le nom des pays pour la légende
-ggplot(table_nationalites, aes(x = "", y = Percentage, fill = factor(native_country, labels = native_country))) +
-  geom_bar(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  scale_fill_viridis(discrete = TRUE, name = "Pays d'origine", guide = guide_legend(override.aes = list(label = native_country))) + 
-  geom_text(aes(label = ifelse(native_country != "Other", paste(sprintf("%.1f%%", Percentage)), "")),
-            position = position_stack(vjust = 0.5)) +
-  theme_void() +
-  theme(legend.position = "right") +
-  labs(fill = "Pays d'origine")
-
 ```
-``` {r}
+
+```{r}
 # Création d'une nouvelle table pour la visualisation sans les États-Unis
 table_nationalites <- salary %>%
   filter(native_country != " United-States") %>%  # Exclure les États-Unis
@@ -186,6 +179,7 @@ ggplot(table_nationalites, aes(x = "", y = Percentage, fill = native_country)) +
 
 
 ```
+
 ## Répartition par sexe
 
 ```{r}
@@ -232,7 +226,6 @@ which(is.infinite(salary$income_40K))
 
 unique(salary$sex)
 
-salary$income_40K <- as.factor(salary$income_40K)
 length(salary$sex)
 length(salary$income_40K)
 ```
@@ -389,24 +382,80 @@ ggplot(aggregated_data_country, aes(x = reorder(native_country, -percentage), y 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 ```
-
+## Regression logistique
 ```{r}
+
+## y = b0 + age*b1 + sex*b2
 glm_model = glm(income_40K ~ age+sex, data=salary, family = "binomial")
+
+
 tbl_regression(glm_model, exponentiate = TRUE)
+
+as_forest_plot(tbl_regression(glm_model, exponentiate = TRUE))
+
+## y = b0 + sex*b1 + education_num*b2 + age*b3
+reg_bin<- glm( (salary$income_40K)~salary$sex+salary$education_num+salary$age, family = "binomial")
+
+tbl_regression(reg_bin, exponentiate = TRUE)
+
+# library(devtools)
+# 
+# install_github("ddsjoberg/bstfun")  
+
+library(bstfun)
+  
+as_forest_plot(tbl_regression(reg_bin, exponentiate = TRUE))
+ 
 ```
 
-## Regression catégoriel
-
-## Y(salaire)=b0 + b1*sex + b2*race + b3*native_country + b4*age
-
+## Création de groupe par zone Géographique
 ```{r}
-salary$sex <- as.factor(salary$sex) 
-salary$race <- as.factor(salary$race)
-salary$native_country <- as.factor(salary$native_country) 
 
-output <- lm(salary$capital_gain~salary$sex+salary$race+salary$native_country+salary$age)
-summary(output)
+a <- salary$native_country
 
-scatterplot3d(salary$native_country, salary$sex, salary$capital_gain, main = "Régression Linéaire en 3D", xlab = "Variable indépendante 1", ylab = "Variable indépendante 2", zlab = "Variable dépendante")
+a[ a %in% c(" Iran"," Japan", " China", " Cambodia"," India"," Philippines"," Thailand"," Taiwan"," Laos"," Hong", " Vietnam")] <-" Asia"
+a[ a %in% c(" United-States", " Canada", " Jamaica"," Haiti"," Puerto-Rico"," Cuba", " Dominican-Republic"," Trinadad&Tobago"," Outlying-US(Guam-USVI-etc)")] <-"North America"
+a[ a %in% c(" South")] <-"Africa"
+a[ a %in% c(" Mexico"," Honduras"," Columbia"," Ecuador"," El-Salvador"," Guatemala"," Peru"," Nicaragua")] <-"America Latina"
+a[ a %in% c(" Italy"," Poland"," England"," Germany"," Portugal"," Greece"," France"," Ireland"," Yugoslavia"," Scotland"," Hungary"," Holand-Netherlands")] <-"Europe"
+
+## Ajout de la colonne Groupe_pays
+salary <- salary %>%
+  mutate(Groupe_Pays = a)
+
+  
 
 ```
+
+## Regression logistique (outcome binaire)
+```{r}
+# Salaire en fonction du statut marital
+glm_model = glm(income_40K ~ marital_status, data=salary, family = "binomial")
+
+
+tbl_regression(glm_model, exponentiate = TRUE)
+
+as_forest_plot(tbl_regression(glm_model, exponentiate = TRUE))
+
+
+```
+## Régression linéaire
+```{r}
+reg_win = lm(salary$capital_gain ~ salary$age)
+summary(reg_win)
+
+reg_loss = lm(salary$capital_loss ~ salary$age)
+summary(reg_loss)
+
+plot(salary$age,salary$capital_gain,main = "Analyse des gains en fonction de l'âge")
+abline(reg_win)
+
+plot(salary$age,salary$capital_loss,main = "Analyse des pertes en fonction de l'âge")
+abline(reg_loss)
+
+plot(predict(reg_win),salary$age, main = "Nuage de point des valeurs prédite en fonction des valeurs observé -Win")
+
+plot(predict(reg_loss),salary$age, main = "Nuage de point des valeurs prédite en fonction des valeurs observé -Loss")
+
+```
+
